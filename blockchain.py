@@ -194,6 +194,7 @@ class Blockchain:
 # Instantiate the Node
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+
 # Generate a globally unique address for this node
 node_identifier = str(uuid4()).replace('-', '')
 
@@ -231,11 +232,7 @@ def mine():
 
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
-    print(request.get_json())
-    values = {}
-    values['sender'] = request.args.get("sender")
-    values['recipient'] = request.args.get("recipient")
-    values['amount'] = request.args.get("amount")
+    values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
     required = ['sender', 'recipient', 'amount']
@@ -260,12 +257,9 @@ def full_chain():
 
 @app.route('/nodes/register', methods=['POST'])
 def register_nodes():
-    values = {}
-    print(request.args)
-    values['nodes'] = request.args.get("nodes")
+    values = request.get_json()
 
-    print(values['nodes'])
-    nodes = values['nodes']
+    nodes = values.get('nodes')
     if nodes is None:
         return "Error: Please supply a valid list of nodes", 400
 
