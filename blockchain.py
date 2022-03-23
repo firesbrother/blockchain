@@ -7,6 +7,8 @@ from uuid import uuid4
 import requests
 from flask import Flask, jsonify, request
 
+class Server:
+    home = ""
 
 class Blockchain:
     def __init__(self):
@@ -200,6 +202,7 @@ node_identifier = str(uuid4()).replace('-', '')
 
 # Instantiate the Blockchain
 blockchain = Blockchain()
+server = Server()
 
 
 @app.route('/mine', methods=['GET'])
@@ -264,15 +267,17 @@ def register_nodes():
         return "Error: Please supply a valid list of nodes", 400
 
     for new_node in nodes:
-        PARAMS2 = {'nodes': list(blockchain.nodes)}
-        URL2 = "http://"+new_node + "/nodes/register"
-        requests.post(url= URL2, params= PARAMS2)
+        
         blockchain.register_node(new_node)
 
         for known_node in list(blockchain.nodes):
-            PARAMS = {'nodes': list(blockchain.nodes)}
-            URL = "http://"+known_node + "/nodes/register"
-            requests.post(url= URL, params= PARAMS)
+            URL = "http://" + known_node 
+            if URL != server.home:
+                URL = URL + "/nodes/register_update"
+                PARAMS = {'nodes': list(blockchain.nodes)}
+                requests.post(url=URL, json=PARAMS, timeout=10)
+
+
 
     response = {
         'message': 'New nodes have been added',
@@ -280,9 +285,46 @@ def register_nodes():
     }
     return jsonify(response), 201
 
-@app.route('/nodes/show', methods=['POST'])
+
+@app.route('/nodes/register_update', methods=['POST'])
+def register_update_nodes():
+    values = request.get_json()
+
+    nodes = values.get('nodes')
+    if nodes is None:
+        return "Error: Please supply a valid list of nodes", 400
+
+    for new_node in nodes:
+        blockchain.register_node(new_node)
+
+    response = {
+        'message': 'New nodes have been added',
+        'total_nodes': list(blockchain.nodes),
+    }
+    return jsonify(response), 201
+
+@app.route('/nodes/register_initial', methods=['POST'])
+def register_initial_nodes():
+    values = request.get_json()
+
+    node = values.get('node')
+    if node is None:
+        return "Error: Please supply a valid home node", 400
+
+    server.home = node
+    blockchain.register_node(node)
+    response = {
+        'message': 'I am',
+        'node': server.home
+    }
+    return jsonify(response), 201
+
+@app.route('/nodes/show', methods=['GET'])
 def show_nodes():
-    return list(blockchain.nodes)
+    response = {
+        'total_nodes': list(blockchain.nodes),
+    }
+    return jsonify(response)
 
 
 @app.route('/nodes/resolve', methods=['GET'])
