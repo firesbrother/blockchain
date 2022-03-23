@@ -265,13 +265,13 @@ def register_nodes():
 
     for new_node in nodes:
         PARAMS2 = {'nodes': list(blockchain.nodes)}
-        URL2 = new_node + "/nodes/register"
+        URL2 = "http://"+new_node + "/nodes/register"
         requests.post(url= URL2, params= PARAMS2)
         blockchain.register_node(new_node)
 
         for known_node in list(blockchain.nodes):
             PARAMS = {'nodes': list(blockchain.nodes)}
-            URL = known_node + "/nodes/register"
+            URL = "http://"+known_node + "/nodes/register"
             requests.post(url= URL, params= PARAMS)
 
     response = {
