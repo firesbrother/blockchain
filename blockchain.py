@@ -263,14 +263,26 @@ def register_nodes():
     if nodes is None:
         return "Error: Please supply a valid list of nodes", 400
 
-    for node in nodes:
-        blockchain.register_node(node)
+    for new_node in nodes:
+        PARAMS2 = {'nodes': list(blockchain.nodes)}
+        URL2 = new_node + "/nodes/register"
+        requests.post(url= URL2, params= PARAMS2)
+        blockchain.register_node(new_node)
+
+        for known_node in list(blockchain.nodes):
+            PARAMS = {'nodes': list(blockchain.nodes)}
+            URL = known_node + "/nodes/register"
+            requests.post(url= URL, params= PARAMS)
 
     response = {
         'message': 'New nodes have been added',
         'total_nodes': list(blockchain.nodes),
     }
     return jsonify(response), 201
+
+@app.route('/nodes/show', methods=['POST'])
+def show_nodes():
+    return list(blockchain.nodes)
 
 
 @app.route('/nodes/resolve', methods=['GET'])
