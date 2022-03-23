@@ -260,10 +260,10 @@ def full_chain():
 @app.route('/nodes/register', methods=['POST'])
 def register_nodes():
     values = {}
-    values['sender'] = request.args.get("sender")
+    values['nodes'] = request.args.get("nodes")
 
 
-    nodes = values.get('nodes')
+    nodes = values['nodes']
     if nodes is None:
         return "Error: Please supply a valid list of nodes", 400
 
