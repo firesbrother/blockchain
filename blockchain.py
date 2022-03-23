@@ -231,6 +231,7 @@ def mine():
 
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
+    print(request.get_json())
     values = {}
     values['sender'] = request.args.get("sender")
     values['recipient'] = request.args.get("recipient")
@@ -260,9 +261,10 @@ def full_chain():
 @app.route('/nodes/register', methods=['POST'])
 def register_nodes():
     values = {}
+    print(request.args)
     values['nodes'] = request.args.get("nodes")
 
-
+    print(values['nodes'])
     nodes = values['nodes']
     if nodes is None:
         return "Error: Please supply a valid list of nodes", 400
